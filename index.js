@@ -2,7 +2,7 @@ const express = require('express');
 const app = express();
 const cors = require('cors');
 require('dotenv').config()
-const { MongoClient, ServerApiVersion } = require('mongodb');
+const { MongoClient, ServerApiVersion, ObjectId } = require('mongodb');
 const port = process.env.PORT || 5000;
 
 // middleware
@@ -28,6 +28,7 @@ async function run() {
     // await client.connect();
 
     const userCollection = client.db("employee").collection("users");
+    const employCollection = client.db("employee").collection("employ");
 
     //user related api 
     app.post('/users', async (req, res) => {
@@ -41,6 +42,26 @@ async function run() {
        const result =await userCollection.insertOne(user)
         res.send(result);
       });
+      
+
+      //employee data api
+      app.post('/employee',async (req,res) =>{
+        const user=req.body
+        const result =await employCollection.insertOne(user)
+        res.send(result)
+      })
+
+      app.get('/employee', async(req,res) =>{
+        const result=await employCollection.find().toArray()
+        res.send(result)
+      })
+
+      app.delete('/employee/:id', async (req,res) =>{
+        const id=req.params.id;
+        const query={_id: new ObjectId(id)}
+        const result=await employCollection.deleteOne(query)
+        res.send(result)
+      })
 
 
     // Send a ping to confirm a successful connection
