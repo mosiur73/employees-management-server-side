@@ -30,6 +30,7 @@ async function run() {
 
     const userCollection = client.db("employee").collection("users");
     const employCollection = client.db("employee").collection("employ");
+    const payrollCollection = client.db("employee").collection("payroll");
 
     //jwt related api
     app.post('/jwt', async (req, res) => {
@@ -39,7 +40,7 @@ async function run() {
     })
     //middleware
     const verifyToken=(req,res,next)=>{
-      console.log('inside verify token', req.headers.authorization);
+      // console.log('inside verify token', req.headers.authorization);
       if (!req.headers.authorization) {
         return res.status(401).send({ message: 'unauthorized access' });
       }
@@ -81,7 +82,7 @@ async function run() {
       });
 
       app.get('/users',verifyToken, async(req,res) =>{
-        console.log(req.headers);
+        // console.log(req.headers);
         const result=await userCollection.find().toArray()
         res.send(result)
       })
@@ -102,14 +103,20 @@ async function run() {
         res.send({ admin });
       })
       
-      app.delete('/users/:id', async (req,res) =>{
-        const id=req.params.id;
-        const query={_id: new ObjectId(id)}
-        const result=await userCollection.deleteOne(query)
-        res.send(result)
+      app.patch('/users/admin/:id', verifyToken, async (req, res) => {
+        const id = req.params.id;
+        const filter = { _id: new ObjectId(id) };
+        const updatedDoc = {
+          $set: {
+            role: 'Hr'
+          }
+        }
+        const result = await userCollection.updateOne(filter, updatedDoc);
+        res.send(result);
       })
 
-      //employee data api
+
+      //current logged in employee data api
       app.post('/employee',async (req,res) =>{
         const user=req.body
         const result =await employCollection.insertOne(user)
@@ -117,7 +124,9 @@ async function run() {
       })
 
       app.get('/employee', async(req,res) =>{
-        const result=await employCollection.find().toArray()
+        const email=req.query.email;
+        const query={ email:email}
+        const result=await employCollection.find(query).toArray()
         res.send(result)
       })
 
@@ -127,6 +136,39 @@ async function run() {
         const result=await employCollection.deleteOne(query)
         res.send(result)
       })
+      
+
+      // Update employee data by ID
+app.put('/employee/:id', async (req, res) => {
+  const id = req.params.id;
+  const filter = { _id: new ObjectId(id) };
+  const options = { upsert: true }; 
+  const updatedData = req.body;
+
+  // Update operation
+  const updateDoc = {
+      $set: {
+          tasks: updatedData.tasks,
+          hours: updatedData.hours,
+          date: updatedData.date,
+      },
+  };
+
+  try {
+      const result = await employCollection.updateOne(filter, updateDoc, options);
+      res.send(result);
+  } catch (error) {
+      console.error('Error updating employee:', error);
+      res.status(500).send({ message: 'Error updating employee', error });
+  }
+});
+
+//payroll admin related
+app.post('/payroll',async (req,res) =>{
+  const user=req.body
+  const result =await payrollCollection.insertOne(user)
+  res.send(result)
+})
 
 
     // Send a ping to confirm a successful connection
