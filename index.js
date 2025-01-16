@@ -82,10 +82,19 @@ async function run() {
       });
 
       app.get('/users',verifyToken, async(req,res) =>{
-        // console.log(req.headers);
         const result=await userCollection.find().toArray()
         res.send(result)
       })
+
+      //details page 
+    app.get('/users/:id', async (req, res) => {
+      const id = req.params.id;
+      const query = { _id: new ObjectId(id) }
+      const result = await userCollection.findOne(query);
+      res.send(result);
+  }); 
+
+
 
       app.get('/users/admin/:email', verifyToken, async (req, res) => {
         const email = req.params.email;
@@ -108,7 +117,8 @@ async function run() {
         const filter = { _id: new ObjectId(id) };
         const updatedDoc = {
           $set: {
-            role: 'Hr'
+           
+            verified:'verified'
           }
         }
         const result = await userCollection.updateOne(filter, updatedDoc);
@@ -170,7 +180,13 @@ app.post('/payroll',async (req,res) =>{
   res.send(result)
 })
 
+app.get('/payroll',verifyToken, async(req,res) =>{
+  const result=await payrollCollection.find().toArray()
+  res.send(result)
+})
 
+
+    
     // Send a ping to confirm a successful connection
     await client.db("admin").command({ ping: 1 });
     console.log("Pinged your deployment. You successfully connected to MongoDB!");
