@@ -134,11 +134,10 @@ async function run() {
       })
 
       app.get('/employee', async(req,res) =>{
-        const email=req.query.email;
-        const query={ email:email}
-        const result=await employCollection.find(query).toArray()
+       const result=await employCollection.find().toArray()
         res.send(result)
       })
+     
 
       app.delete('/employee/:id', async (req,res) =>{
         const id=req.params.id;
@@ -172,6 +171,40 @@ app.put('/employee/:id', async (req, res) => {
       res.status(500).send({ message: 'Error updating employee', error });
   }
 });
+ 
+//progress related  api
+// app.get('/progress', async(req,res) =>{
+//  const result=await employCollection.find().toArray()
+//   res.send(result)
+// })
+app.get('/progress', async (req, res) => {
+  const { name, month } = req.query; // Extract query parameters
+
+  // Create a filter object
+  const filter = {};
+
+  if (name) {
+    filter.name = name; // Filter by employee name
+  }
+
+  if (month) {
+    const monthNumber = parseInt(month, 10);
+    if (!isNaN(monthNumber)) {
+      filter.date = {
+        $regex: `-${month.padStart(2, '0')}-`, // Match month in the date string
+      };
+    }
+  }
+
+  try {
+    const result = await employCollection.find(filter).toArray();
+    res.send(result);
+  } catch (error) {
+    res.status(500).send({ error: 'Failed to fetch progress data' });
+  }
+});
+
+
 
 //payroll admin related
 app.post('/payroll',async (req,res) =>{
@@ -184,6 +217,14 @@ app.get('/payroll',verifyToken, async(req,res) =>{
   const result=await payrollCollection.find().toArray()
   res.send(result)
 })
+
+app.get('/verified', async (req, res) => {
+ const filter = { verified: "verified" };
+    const result = await userCollection.find(filter).toArray();
+    res.send(result);
+  
+});
+
 
 
     
