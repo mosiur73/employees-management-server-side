@@ -225,6 +225,36 @@ app.get('/verified', async (req, res) => {
   
 });
 
+//adjust salary in admin
+app.patch('/update-salary/:id', async (req, res) => {
+  const { id } = req.params;
+  const { salary } = req.body;
+
+  try {
+    const result = await userCollection.updateOne(
+      { _id: new ObjectId(id) },
+      { $set: { salary } }
+    );
+    res.send(result);
+  } catch (error) {
+    res.status(500).send({ error: 'Failed to update salary' });
+  }
+});
+
+//make hr
+app.patch('/users/hr/:id', verifyToken, async (req, res) => {
+  const id = req.params.id;
+  const filter = { _id: new ObjectId(id) };
+  const updatedDoc = {
+    $set: {
+     
+      role:'Hr'
+    }
+  }
+  const result = await userCollection.updateOne(filter, updatedDoc);
+  res.send(result);
+})
+
 
 
     
