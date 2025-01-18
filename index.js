@@ -259,20 +259,17 @@ app.patch('/users/hr/:id', verifyToken, async (req, res) => {
 
 
 //For payment history related  api
-app.post('/history/:id', async (req, res) => {
-  try {
+app.post('/history', async (req, res) => {
       const user = req.body; 
-
-      // Insert the document into the 'history' collection
       const result = await historyCollection.insertOne(user);
-
-      // Send the result back to the client
-      res.send(result);
-  } catch (error) {
-      console.error('Error while inserting into history:', error);
-      res.status(500).send({ message: 'Internal Server Error' });
-  }
+       res.send(result);
+  
 });
+
+app.get('/history',verifyToken, async(req,res) =>{
+  const result=await historyCollection.find().toArray()
+  res.send(result)
+})
 
 
 
