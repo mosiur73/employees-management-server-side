@@ -31,6 +31,7 @@ async function run() {
     const userCollection = client.db("employee").collection("users");
     const employCollection = client.db("employee").collection("employ");
     const payrollCollection = client.db("employee").collection("payroll");
+    const historyCollection = client.db("employee").collection("history");
 
     //jwt related api
     app.post('/jwt', async (req, res) => {
@@ -254,6 +255,25 @@ app.patch('/users/hr/:id', verifyToken, async (req, res) => {
   const result = await userCollection.updateOne(filter, updatedDoc);
   res.send(result);
 })
+
+
+
+//For payment history related  api
+app.post('/history/:id', async (req, res) => {
+  try {
+      const user = req.body; 
+
+      // Insert the document into the 'history' collection
+      const result = await historyCollection.insertOne(user);
+
+      // Send the result back to the client
+      res.send(result);
+  } catch (error) {
+      console.error('Error while inserting into history:', error);
+      res.status(500).send({ message: 'Internal Server Error' });
+  }
+});
+
 
 
 
