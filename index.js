@@ -32,6 +32,7 @@ async function run() {
     const employCollection = client.db("employee").collection("employ");
     const payrollCollection = client.db("employee").collection("payroll");
     const historyCollection = client.db("employee").collection("history");
+    const contactCollection = client.db("employee").collection("contact");
 
     //jwt related api
     app.post('/jwt', async (req, res) => {
@@ -272,6 +273,19 @@ app.get('/history',verifyToken, async(req,res) =>{
 })
 
 
+//contact section   send message
+app.post('/contact', async (req, res) => {
+  const user = req.body; 
+  const result = await contactCollection.insertOne(user);
+   res.send(result);
+
+});
+
+app.get('/contact',verifyToken, async(req,res) =>{
+  const result=await contactCollection.find().toArray()
+  res.send(result)
+})
+
 
 
     
@@ -281,7 +295,7 @@ app.get('/history',verifyToken, async(req,res) =>{
   } finally {
     // Ensures that the client will close when you finish/error
     // await client.close();
-  }
+  }   
 }
 run().catch(console.dir);
 
