@@ -111,7 +111,7 @@ async function run() {
         if (user) {
           admin = user?.role === 'admin';
         }
-        res.send({ admin });
+        res.send({ admin:user.role });
       })
       
       app.patch('/users/admin/:id', verifyToken, async (req, res) => {
@@ -136,7 +136,10 @@ async function run() {
       })
 
       app.get('/employee', async(req,res) =>{
-       const result=await employCollection.find().toArray()
+        const email=req.query.email
+        const query={email : email}
+        console.log(query)
+       const result=await employCollection.find(query).toArray()
         res.send(result)
       })
      
@@ -175,12 +178,9 @@ app.put('/employee/:id', async (req, res) => {
 });
  
 //progress related  api
-// app.get('/progress', async(req,res) =>{
-//  const result=await employCollection.find().toArray()
-//   res.send(result)
-// })
+
 app.get('/progress', async (req, res) => {
-  const { name, month } = req.query; // Extract query parameters
+  const { name, month } = req.query; 
 
   // Create a filter object
   const filter = {};
@@ -220,7 +220,7 @@ app.get('/payroll',verifyToken, async(req,res) =>{
   res.send(result)
 })
 
-app.get('/verified', async (req, res) => {
+app.get('/verified',verifyToken, async (req, res) => {
  const filter = { verified: "verified" };
     const result = await userCollection.find(filter).toArray();
     res.send(result);
@@ -228,7 +228,7 @@ app.get('/verified', async (req, res) => {
 });
 
 //adjust salary in admin
-app.patch('/update-salary/:id', async (req, res) => {
+app.patch('/update-salary/:id',verifyToken,verifyAdmin, async (req, res) => {
   const { id } = req.params;
   const { salary } = req.body;
 
@@ -244,7 +244,7 @@ app.patch('/update-salary/:id', async (req, res) => {
 });
 
 //make hr
-app.patch('/users/hr/:id', verifyToken, async (req, res) => {
+app.patch('/users/hr/:id', verifyToken,verifyAdmin, async (req, res) => {
   const id = req.params.id;
   const filter = { _id: new ObjectId(id) };
   const updatedDoc = {
@@ -257,6 +257,17 @@ app.patch('/users/hr/:id', verifyToken, async (req, res) => {
   res.send(result);
 })
 
+//fired user 
+app.put('/users/fire/:id', async (req, res) => {
+  const { id } = req.params;
+  try {
+    const result = await userCollection.updateOne({ _id: id }, { $set: { isFired: true } });
+    res.status(200).send(result);
+  } catch (error) {
+    res.status(500).send({ error: 'Failed to fire user' });
+  }
+});
+
 
 
 //For payment history related  api
@@ -268,7 +279,9 @@ app.post('/history', async (req, res) => {
 });
 
 app.get('/history',verifyToken, async(req,res) =>{
-  const result=await historyCollection.find().toArray()
+  const email=req.query.email
+  const query={email : email}
+  const result=await historyCollection.find(query).toArray()
   res.send(result)
 })
 
@@ -286,11 +299,9 @@ app.get('/contact',verifyToken, async(req,res) =>{
   res.send(result)
 })
 
-
-
     
     // Send a ping to confirm a successful connection
-    await client.db("admin").command({ ping: 1 });
+    // await client.db("admin").command({ ping: 1 });
     console.log("Pinged your deployment. You successfully connected to MongoDB!");
   } finally {
     // Ensures that the client will close when you finish/error
