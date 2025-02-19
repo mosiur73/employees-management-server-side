@@ -152,7 +152,7 @@ async function run() {
       })
       
 
-      // Update employee data by ID
+      // Update employee data by ID  and user
 app.put('/employee/:id', async (req, res) => {
   const id = req.params.id;
   const filter = { _id: new ObjectId(id) };
