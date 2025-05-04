@@ -152,7 +152,7 @@ async function run() {
       })
       
 
-      // Update employee data by ID  and user
+      // Update employee data by ID  and user for every user
 app.put('/employee/:id', async (req, res) => {
   const id = req.params.id;
   const filter = { _id: new ObjectId(id) };
@@ -177,16 +177,16 @@ app.put('/employee/:id', async (req, res) => {
   }
 });
  
-//progress related  api
+//progress related  api and 
 
 app.get('/progress', async (req, res) => {
   const { name, month } = req.query; 
 
-  // Create a filter object
+  
   const filter = {};
 
   if (name) {
-    filter.name = name; // Filter by employee name
+    filter.name = name; 
   }
 
   if (month) {
